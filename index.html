@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="theme-color" content="#1abc9c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RMZ Tools">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>RMZ TEAM - টুলস হাব</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            color: white;
+            font-size: 28px;
+        }
+        .header p {
+            margin: 8px 0 0;
+            color: rgba(255,255,255,0.9);
+            font-size: 14px;
+        }
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            background: #2c3e50;
+            gap: 2px;
+        }
+        .tab-btn {
+            flex: 1;
+            background: #34495e;
+            border: none;
+            padding: 15px 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .tab-btn:hover {
+            background: #1abc9c;
+        }
+        .tab-btn.active {
+            background: #1abc9c;
+            color: #000;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border-top: 3px solid #1abc9c;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        iframe {
+            width: 100%;
+            min-height: 80vh;
+            border: none;
+            border-radius: 12px;
+            background: white;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        .info-note {
+            background: #e8f4f8;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+        .telegram-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .telegram-btn {
+            background: #0088cc;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        .telegram-btn:hover {
+            transform: scale(1.1);
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0,136,204,0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(0,136,204,0); }
+            100% { box-shadow: 0 0 0 0 rgba(0,136,204,0); }
+        }
+        
+        /* কপি নোটিফিকেশন স্টাইল */
+        .copy-toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 1002;
+            display: none;
+            white-space: nowrap;
+        }
+        .copy-toast.show {
+            display: block;
+            animation: fadeInOut 1.5s ease;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; bottom: 80px; }
+            15% { opacity: 1; bottom: 100px; }
+            85% { opacity: 1; bottom: 100px; }
+            100% { opacity: 0; bottom: 80px; }
+        }
+        
+        /* 2FA নিজস্ব UI (iframe ছাড়া) */
+        .fa-container {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .fa-input-area {
+            margin-bottom: 20px;
+        }
+        .fa-input-area label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .fa-input-area textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: monospace;
+            resize: vertical;
+            transition: 0.3s;
+        }
+        .fa-input-area textarea:focus {
+            outline: none;
+            border-color: #1abc9c;
+        }
+        .fa-key-area {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+        .fa-key-display {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            font-family: monospace;
+            letter-spacing: 2px;
+            word-break: break-all;
+        }
+        .fa-copy-btn {
+            display: block;
+            width: 100%;
+            background: #1abc9c;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: 0.3s;
+        }
+        .fa-copy-btn:hover {
+            background: #16a085;
+        }
+        .fa-status {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #888;
+        }
+        
+        @media (max-width: 600px) {
+            .tab-btn { font-size: 12px; padding: 10px 5px; }
+            iframe { min-height: 70vh; }
+            .telegram-btn { width: 50px; height: 50px; }
+            .fa-key-display { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🚀 RMZ TEAM</h1>
+        <p>Your Trusted Tool Hub</p>
+    </div>
+    
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="tab1">🔢 ২এফএ জেনারেটর</button>
+        <button class="tab-btn" data-tab="tab2">🍪 কুকি টু ইউআইডি</button>
+        <button class="tab-btn" data-tab="tab3">🔐 ফেইসবুক আইডি রিলিজ</button>
+    </div>
+
+    <!-- 2FA ট্যাব - নিজস্ব UI যাতে পেস্ট করলেই কাজ করে -->
+    <div id="tab1" class="tab-content active">
+        <div class="info-note">
+            📌 ২-ফ্যাক্টর অথেনটিকেশন কোড জেনারেটর। নিচের বক্সে আপনার সিক্রেট কী পেস্ট করুন।
+        </div>
+        
+        <div class="fa-container">
+            <div class="fa-input-area">
+                <label>🔑 আপনার সিক্রেট কী (Base32):</label>
+                <textarea id="secretKeyInput" rows="3" placeholder="যেমন: JBSWY3DPEHPK3PXP  বা আপনার 2FA সিক্রেট কী পেস্ট করুন..."></textarea>
+            </div>
+            
+            <div id="keyDisplayArea" class="fa-key-area" style="display: none;">
+                <div class="fa-key-display" id="generatedCode">----</div>
+                <button class="fa-copy-btn" id="copyCodeBtn">📋 কোড কপি করুন</button>
+                <div class="fa-status" id="codeStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab2" class="tab-content">
+        <div class="info-note">
+            📌 একাধিক কুকি পেস্ট করে ইউজার আইডি বের করুন।
+        </div>
+        <iframe src="https://abdulkhalekak.github.io/Cookies-to-uid/"></iframe>
+    </div>
+
+    <div id="tab3" class="tab-content">
+        <div class="info-note">
+            📌 ফেইসবুক আইডি রিলিজ টুল।
+        </div>
+        <iframe src="https://abdulkhalekak.github.io/Fb-id-relece-/"></iframe>
+    </div>
+</div>
+
+<div class="telegram-float">
+    <a href="https://t.me/realmoneyincomezone" target="_blank" style="text-decoration:none;">
+        <div class="telegram-btn">
+            <svg width="35" height="35" viewBox="0 0 24 24" fill="white">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.66-.35-1.02.22-1.62.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.98 1.26-5.59 3.7-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.05-.49-.83-.27-1.48-.42-1.42-.89.03-.24.36-.49.99-.74 3.91-1.7 6.52-2.82 7.84-3.38 3.73-1.59 4.51-1.86 5.01-1.87.11 0 .36.03.52.19.13.13.17.31.18.48-.01.13-.01.21-.02.25z"/>
+            </svg>
+        </div>
+    </a>
+</div>
+
+<!-- কপি নোটিফিকেশন -->
+<div id="copyToast" class="copy-toast">✅ কপি হয়েছে!</div>
+
+<script>
+    // ট্যাব সুইচিং
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+    tabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            tabs.forEach(b => b.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+    
+    // ============ 2FA জেনারেটর (পেস্ট করলেই অটো) ============
+    const secretInput = document.getElementById('secretKeyInput');
+    const keyDisplayArea = document.getElementById('keyDisplayArea');
+    const generatedCodeSpan = document.getElementById('generatedCode');
+    const copyCodeBtn = document.getElementById('copyCodeBtn');
+    const codeStatus = document.getElementById('codeStatus');
+    const copyToast = document.getElementById('copyToast');
+    
+    // টোস্ট দেখানোর ফাংশন
+    function showToast() {
+        copyToast.classList.add('show');
+        setTimeout(() => {
+            copyToast.classList.remove('show');
+        }, 1500);
+    }
+    
+    // Base32 ডিকোড (রফতানির জন্য)
+    function base32toBytes(base32) {
+        const base32Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        let cleaned = base32.toUpperCase().replace(/[^A-Z2-7]/g, '');
+        let bits = 0;
+        let value = 0;
+        let output = [];
+        
+        for (let i = 0; i < cleaned.length; i++) {
+            const idx = base32Chars.indexOf(cleaned[i]);
+            if (idx === -1) continue;
+            value = (value << 5) | idx;
+            bits += 5;
+            if (bits >= 8) {
+                output.push((value >> (bits - 8)) & 0xff);
+                bits -= 8;
+            }
+        }
+        return new Uint8Array(output);
+    }
+    
+    // TOTP জেনারেট (RFC 6238)
+    async function generateTOTP(secret) {
+        if (!secret || secret.trim() === '') return null;
+        
+        try {
+            // বর্তমান সময়ের কাউন্টার (30 সেকেন্ডের স্লট)
+            const counter = Math.floor(Date.now() / 30000);
+            const counterBuffer = new ArrayBuffer(8);
+            const counterView = new DataView(counterBuffer);
+            counterView.setUint32(4, Math.floor(counter / 0x100000000));
+            counterView.setUint32(8, counter);
+            
+            const key = base32toBytes(secret);
+            const cryptoKey = await crypto.subtle.importKey(
+                'raw',
+                key,
+                { name: 'HMAC', hash: 'SHA-1' },
+                false,
+                ['sign']
+            );
+            
+            const signature = await crypto.subtle.sign('HMAC', cryptoKey, counterBuffer);
+            const hmac = new Uint8Array(signature);
+            const offset = hmac[hmac.length - 1] & 0x0f;
+            const binary = ((hmac[offset] & 0x7f) << 24) |
+                          ((hmac[offset + 1] & 0xff) << 16) |
+                          ((hmac[offset + 2] & 0xff) << 8) |
+                          (hmac[offset + 3] & 0xff);
+            
+            const otp = binary % 1000000;
+            return otp.toString().padStart(6, '0');
+        } catch(e) {
+            console.error('TOTP Error:', e);
+            return null;
+        }
+    }
+    
+    // অটো জেনারেট এবং আপডেট (প্রতি সেকেন্ডে)
+    let updateInterval = null;
+    
+    async function updateCode() {
+        const secret = secretInput.value.trim();
+        if (!secret) {
+            keyDisplayArea.style.display = 'none';
+            if (updateInterval) clearInterval(updateInterval);
+            return;
+        }
+        
+        const code = await generateTOTP(secret);
+        if (code) {
+            keyDisplayArea.style.display = 'block';
+            generatedCodeSpan.textContent = code;
+            
+            // কাউন্টডাউন দেখানো (বাকি সেকেন্ড)
+            const remaining = 30 - (Math.floor(Date.now() / 1000) % 30);
+            codeStatus.textContent = `⏱️ ${remaining} সেকেন্ডে পরিবর্তন হবে`;
+        } else {
+            keyDisplayArea.style.display = 'block';
+            generatedCodeSpan.textContent = '❌ ভুল সিক্রেট কী';
+            codeStatus.textContent = 'সঠিক Base32 ফরম্যাটে কী দিন';
+        }
+    }
+    
+    // পেস্ট করলেই অটোমেটিক জেনারেট
+    secretInput.addEventListener('paste', function(e) {
+        setTimeout(() => {
+            updateCode();
+            if (updateInterval) clearInterval(updateInterval);
+            updateInterval = setInterval(updateCode, 1000);
+        }, 50);
+    });
+    
+    // ম্যানুয়াল টাইপ করলেও কাজ করবে
+    secretInput.addEventListener('input', function() {
+        updateCode();
+        if (updateInterval) clearInterval(updateInterval);
+        updateInterval = setInterval(updateCode, 1000);
+    });
+    
+    // কোড কপি করার ফাংশন
+    copyCodeBtn.addEventListener('click', async function() {
+        const code = generatedCodeSpan.textContent;
+        if (code && code !== '----' && !code.includes('❌')) {
+            try {
+                await navigator.clipboard.writeText(code);
+                showToast();
+                codeStatus.textContent = '✅ কপি হয়েছে!';
+                setTimeout(() => {
+                    if (codeStatus.textContent === '✅ কপি হয়েছে!') {
+                        const remaining = 30 - (Math.floor(Date.now() / 1000) % 30);
+                        codeStatus.textContent = `⏱️ ${remaining} সেকেন্ডে পরিবর্তন হবে`;
+                    }
+                }, 2000);
+            } catch(err) {
+                alert('কপি করতে ব্যর্থ হয়েছে');
+            }
+        } else {
+            alert('কোনো বৈধ কোড নেই');
+        }
+    });
+    
+    // iframe এর জন্য টোস্ট (অন্যান্য ট্যাব)
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach(iframe => {
+        iframe.addEventListener('load', () => {
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                iframeDoc.addEventListener('copy', () => setTimeout(showToast, 100));
+            } catch(e) {}
+        });
+    });
+</script>
+</body>
+</html>
