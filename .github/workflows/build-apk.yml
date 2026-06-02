@@ -1,0 +1,60 @@
+name: Build and Release APK
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+      
+      - name: Install Cordova
+        run: npm install -g cordova
+      
+      - name: Build APK with Clipboard Plugin
+        run: |
+          cordova create app com.rmzteam.toolshub "RMZ Tools Hub"
+          cd app
+          cordova platform add android
+          
+          # ক্লিপবোর্ড প্লাগইন যোগ করুন
+          cordova plugin add cordova-plugin-clipboard
+          
+          rm -rf www/*
+          cp ../index.html www/index.html
+          
+          # ক্লিপবোর্ড সাপোর্ট সহ index.html
+          cat >> www/index.html << 'EOF'
+          <script>
+          document.addEventListener('deviceready', function() {
+              window.cordova.plugins.clipboard;
+          });
+          </script>
+          EOF
+          
+          cordova build android --debug
+          cp platforms/android/app/build/outputs/apk/debug/app-debug.apk /home/runner/work/rmz-tools-hub/rmz-tools-hub/RMZ-Tools-Hub.apk
+      
+      - name: Create Release and Upload APK
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: "RMZ Tools Hub v1.0.${{ github.run_number }}"
+          files: RMZ-Tools-Hub.apk
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
