@@ -27,34 +27,39 @@ jobs:
       
       - name: Build APK with Clipboard Plugin
         run: |
+          # রিপোজিটরির নাম অটো ডিটেক্ট
+          REPO_NAME=$(basename $GITHUB_WORKSPACE)
+          echo "Repository name: $REPO_NAME"
+          
           cordova create app com.rmzteam.toolshub "RMZ Tools Hub"
           cd app
           cordova platform add android
           
-          # ক্লিপবোর্ড প্লাগইন যোগ করুন
+          # Clipboard প্লাগইন যোগ
           cordova plugin add cordova-plugin-clipboard
           
           rm -rf www/*
           cp ../index.html www/index.html
           
-          # ক্লিপবোর্ড সাপোর্ট সহ index.html
-          cat >> www/index.html << 'EOF'
-          <script>
-          document.addEventListener('deviceready', function() {
-              window.cordova.plugins.clipboard;
-          });
-          </script>
-          EOF
-          
+          # Debug বিল্ড
           cordova build android --debug
-          cp platforms/android/app/build/outputs/apk/debug/app-debug.apk /home/runner/work/rmz-tools-hub/rmz-tools-hub/RMZ-Tools-Hub.apk
+          
+          # APK খুঁজে বের করে কপি (সঠিক পাথে)
+          APK_PATH=$(find . -name "*.apk" -type f | head -1)
+          echo "APK found at: $APK_PATH"
+          
+          # ওয়ার্কস্পেসে কপি
+          cp "$APK_PATH" $GITHUB_WORKSPACE/RMZ-Tools-Hub.apk
+          
+          # ভেরিফাই
+          ls -la $GITHUB_WORKSPACE/RMZ-Tools-Hub.apk
       
       - name: Create Release and Upload APK
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: "RMZ Tools Hub v1.0.${{ github.run_number }}"
-          files: RMZ-Tools-Hub.apk
+          files: ${{ github.workspace }}/RMZ-Tools-Hub.apk
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
